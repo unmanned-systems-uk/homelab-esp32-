@@ -97,9 +97,14 @@ class SensorMonitor:
         esp32_port = None
 
         for port in ports:
-            # Look for common ESP32 USB-serial chips
-            if any(chip in port.description.lower() for chip in
-                   ['cp210', 'ch340', 'ch9102', 'ftdi', 'usb serial']):
+            desc = port.description.lower()
+            mfr = (port.manufacturer or "").lower()
+
+            # Look for ESP32 devices:
+            # 1. Built-in USB-JTAG (ESP32-C6, ESP32-S3, etc.)
+            # 2. Common USB-serial chips (CH340, CP210x, FTDI)
+            if any(match in desc or match in mfr for match in
+                   ['espressif', 'jtag', 'cp210', 'ch340', 'ch9102', 'ftdi', 'usb serial']):
                 esp32_port = port.device
                 break
 
