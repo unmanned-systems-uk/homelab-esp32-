@@ -17,15 +17,18 @@
 
 **Issue:** Build failed with "Failed to resolve component 'esp_zigbee_core'"
 
-**Root Cause:** ESP-IDF requires a specific directory structure that differs from typical Arduino projects.
+**Root Cause:** PlatformIO + ESP-IDF requires a specific directory structure that differs from native ESP-IDF projects.
 
-**Solution:**
-- Use `main/` directory instead of `src/` for source files
-- Place `idf_component.yml` in the `main/` directory (not root)
-- Structure:
+**CRITICAL: PlatformIO MUST use `src/` directory (NOT `main/`)**
+- Native ESP-IDF projects use `main/` directory
+- **PlatformIO projects MUST use `src/` directory** - if you use `main/`, PlatformIO will not recognize the project and will not initiate
+- Place `idf_component.yml` in the `src/` directory (not root)
+- Place `CMakeLists.txt` in the `src/` directory
+
+**Correct Structure for PlatformIO + ESP-IDF:**
   ```
   zigbee-multi-sensor/
-  ├── main/
+  ├── src/                      ← MUST be src/ for PlatformIO
   │   ├── CMakeLists.txt
   │   ├── idf_component.yml    ← Component dependencies
   │   └── main.c
