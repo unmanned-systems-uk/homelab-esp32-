@@ -1,11 +1,12 @@
-# Multi-Sensor Test: BH1750 + DS18B20
+# Multi-Sensor Test: BH1750 + DS18B20 + DHT11
 
 **Sensors:**
 - BH1750 Digital Light Sensor (I2C)
-- DS18B20 Digital Temperature Sensor (1-Wire)
+- DS18B20 Digital Temperature Sensor (1-Wire Dallas)
+- DHT11 Temperature & Humidity Sensor (1-Wire DHT protocol)
 
 **Framework:** ESP-IDF (native)
-**Purpose:** Test I2C and 1-Wire sensors simultaneously
+**Purpose:** Test I2C and multiple 1-Wire protocols simultaneously
 
 ---
 
@@ -14,22 +15,25 @@
 ### Wiring Diagram
 
 ```
-BH1750 Module          Waveshare ESP32-C6-Zero    DS18B20 Probe
-┌──────────┐                                      ┌──────────┐
-│  BH1750  │           ┌──────────────┐           │ DS18B20  │
-│          │           │              │           │  Probe   │
-│  VCC  ───┼──────────►│ 3.3V ◄───────┼───────────│ RED      │
-│  GND  ───┼──────────►│ GND  ◄───────┼───────────│ BLACK    │
-│  SCL  ───┼──────────►│ GPIO2 (SCL)  │           │          │
-│  SDA  ───┼──────────►│ GPIO1 (SDA)  │           │          │
-│  ADDR ───┼───────────┤ GND or Float │  [4.7kΩ]  │          │
-│          │           │ GPIO5 ◄──────┴───┬───────│ YELLOW   │
-└──────────┘           │              │   │       │          │
-                       │ 3.3V ─────────────┘       │          │
-                       └──────────────┘            └──────────┘
+BH1750 Module    Waveshare ESP32-C6-Zero    DS18B20 Probe    DHT11 Module
+┌──────────┐                                ┌──────────┐     ┌──────────┐
+│  BH1750  │     ┌──────────────┐           │ DS18B20  │     │  DHT11   │
+│          │     │              │           │  Probe   │     │          │
+│  VCC  ───┼────►│ 3.3V ◄───────┼───────────│ RED      │◄────┤ VCC      │
+│  GND  ───┼────►│ GND  ◄───────┼───────────│ BLACK    │◄────┤ GND      │
+│  SCL  ───┼────►│ GPIO2 (SCL)  │           │          │     │          │
+│  SDA  ───┼────►│ GPIO1 (SDA)  │           │          │     │          │
+│  ADDR ───┼─────┤ GND or Float │  [4.7kΩ]  │          │     │          │
+│          │     │ GPIO5 ◄──────┴───┬───────│ YELLOW   │     │          │
+└──────────┘     │              │   │       │          │     │          │
+                 │ 3.3V ─────────────┘       │          │     │          │
+                 │ GPIO4 ◄───────────────────────────────────┤ DATA     │
+                 └──────────────┘            └──────────┘     └──────────┘
 ```
 
-**Note:** DS18B20 requires 4.7kΩ pull-up resistor between DATA and 3.3V
+**Notes:**
+- DS18B20 requires 4.7kΩ pull-up resistor between DATA and 3.3V
+- DHT11 typically has built-in pull-up resistor on module (no external resistor needed)
 
 ### Pin Connections
 
@@ -43,7 +47,7 @@ BH1750 Module          Waveshare ESP32-C6-Zero    DS18B20 Probe
 | SDA | GPIO1 | I2C Data (4.7kΩ pull-up usually on module) |
 | ADDR | GND or Float | GND = 0x23, Float = 0x5C (default 0x23) |
 
-**DS18B20 (1-Wire):**
+**DS18B20 (1-Wire Dallas):**
 
 | Wire Color | ESP32-C6 Pin | Notes |
 |------------|--------------|-------|
@@ -52,6 +56,16 @@ BH1750 Module          Waveshare ESP32-C6-Zero    DS18B20 Probe
 | YELLOW | GPIO5 | Data (requires 4.7kΩ pull-up to 3.3V) |
 
 **Important:** DS18B20 requires external 4.7kΩ pull-up resistor between DATA and 3.3V!
+
+**DHT11 (1-Wire DHT Protocol):**
+
+| Pin | ESP32-C6 Pin | Notes |
+|-----|--------------|-------|
+| VCC | 3.3V | Power (can use 3.3V or 5V, using 3.3V for ESP32-C6) |
+| GND | GND | Ground |
+| DATA | GPIO4 | Data (module usually has built-in pull-up) |
+
+**Note:** DHT11 modules typically include a built-in pull-up resistor. No external resistor needed.
 
 ---
 
@@ -78,16 +92,26 @@ pio device monitor
 ## Expected Output
 
 ```
-=================================
-BH1750 Illuminance Sensor Test
-=================================
-BH1750 initialized successfully
-=================================
+========================================
+Multi-Sensor Test: BH1750 + DS18B20 + DHT11
+Waveshare ESP32-C6-Zero
+========================================
+BH1750: ✓ BH1750 ready (Address: 0x23)
+DS18B20: ✓ DS18B20 detected on 1-Wire bus
+DHT11: ✓ DHT11 initialized
+========================================
+Starting measurements (every 2 seconds)...
 
-Light: 245.3 lux (Normal Indoor)
-Light: 248.1 lux (Normal Indoor)
-Light: 892.7 lux (Bright Indoor)
-Light: 15234.5 lux (Direct Sunlight)
+BH1750: Light:    53.3 lux | Dim Indoor       | #
+DS18B20: Temp:   17.50 °C  (63.50 °F)  [Outdoor]
+DHT11: Temp:   22.0 °C  (71.6 °F)  [Indoor]
+DHT11: Humid:  45.0 %
+---
+BH1750: Light:    54.2 lux | Dim Indoor       | #
+DS18B20: Temp:   17.44 °C  (63.39 °F)  [Outdoor]
+DHT11: Temp:   22.0 °C  (71.6 °F)  [Indoor]
+DHT11: Humid:  45.0 %
+---
 ```
 
 ---
@@ -245,5 +269,5 @@ Once BH1750 is working:
 
 ---
 
-**Test Status:** ✅ Passed (BH1750: 53.3 lux, DS18B20: 16-17°C)
+**Test Status:** ⏳ Testing DHT11 (BH1750 ✅, DS18B20 ✅, DHT11 pending)
 **Last Updated:** 2026-01-14

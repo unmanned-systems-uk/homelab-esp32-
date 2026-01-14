@@ -33,8 +33,15 @@
 #define DS18B20_CMD_READ_SCRATCHPAD 0xBE
 #define DS18B20_CMD_SKIP_ROM        0xCC
 
+// ========================================
+// DHT11 Configuration
+// ========================================
+#define DHT11_GPIO                  4       // GPIO4
+#define DHT11_TIMEOUT_US            1000    // Timeout for bit reads
+
 static const char *TAG_BH1750 = "BH1750";
 static const char *TAG_DS18B20 = "DS18B20";
+static const char *TAG_DHT11 = "DHT11";
 
 // ========================================
 // 1-Wire Protocol Implementation
@@ -249,6 +256,112 @@ static esp_err_t ds18b20_read_temperature(gpio_num_t pin, float *temperature)
 }
 
 // ========================================
+// DHT11 Functions
+// ========================================
+
+static esp_err_t dht11_wait_for_level(gpio_num_t pin, int level, uint32_t timeout_us)
+{
+    uint32_t start = esp_timer_get_time();
+    while (gpio_get_level(pin) != level) {
+        if ((esp_timer_get_time() - start) > timeout_us) {
+            return ESP_ERR_TIMEOUT;
+        }
+    }
+    return ESP_OK;
+}
+
+static esp_err_t dht11_read_bit(gpio_num_t pin, uint8_t *bit)
+{
+    // Wait for low phase (start of bit)
+    if (dht11_wait_for_level(pin, 0, DHT11_TIMEOUT_US) != ESP_OK) {
+        return ESP_ERR_TIMEOUT;
+    }
+
+    // Wait for high phase
+    if (dht11_wait_for_level(pin, 1, DHT11_TIMEOUT_US) != ESP_OK) {
+        return ESP_ERR_TIMEOUT;
+    }
+
+    // Measure high pulse duration
+    uint32_t start = esp_timer_get_time();
+    if (dht11_wait_for_level(pin, 0, DHT11_TIMEOUT_US) != ESP_OK) {
+        return ESP_ERR_TIMEOUT;
+    }
+    uint32_t duration = esp_timer_get_time() - start;
+
+    // Bit is 1 if high phase > 40us, otherwise 0
+    *bit = (duration > 40) ? 1 : 0;
+
+    return ESP_OK;
+}
+
+static esp_err_t dht11_read_data(gpio_num_t pin, float *temperature, float *humidity)
+{
+    uint8_t data[5] = {0};
+
+    // Send start signal: pull low for 18ms
+    gpio_set_direction(pin, GPIO_MODE_OUTPUT);
+    gpio_set_level(pin, 0);
+    vTaskDelay(pdMS_TO_TICKS(18));
+
+    // Release and wait 20-40us
+    gpio_set_level(pin, 1);
+    onewire_delay_us(30);
+
+    // Switch to input mode
+    gpio_set_direction(pin, GPIO_MODE_INPUT);
+
+    // Wait for DHT11 response: low (80us) then high (80us)
+    if (dht11_wait_for_level(pin, 0, 100) != ESP_OK) {
+        ESP_LOGE(TAG_DHT11, "No response (timeout waiting for low)");
+        return ESP_FAIL;
+    }
+
+    if (dht11_wait_for_level(pin, 1, 100) != ESP_OK) {
+        ESP_LOGE(TAG_DHT11, "No response (timeout waiting for high)");
+        return ESP_FAIL;
+    }
+
+    if (dht11_wait_for_level(pin, 0, 100) != ESP_OK) {
+        ESP_LOGE(TAG_DHT11, "No response (timeout after high)");
+        return ESP_FAIL;
+    }
+
+    // Read 40 bits (5 bytes)
+    for (int i = 0; i < 40; i++) {
+        uint8_t bit;
+        if (dht11_read_bit(pin, &bit) != ESP_OK) {
+            ESP_LOGE(TAG_DHT11, "Timeout reading bit %d", i);
+            return ESP_FAIL;
+        }
+        data[i / 8] <<= 1;
+        data[i / 8] |= bit;
+    }
+
+    // Verify checksum
+    uint8_t checksum = data[0] + data[1] + data[2] + data[3];
+    if (checksum != data[4]) {
+        ESP_LOGE(TAG_DHT11, "Checksum error: calc=0x%02X, recv=0x%02X", checksum, data[4]);
+        return ESP_FAIL;
+    }
+
+    // DHT11 returns integer values in data[0] (humidity) and data[2] (temperature)
+    *humidity = (float)data[0];
+    *temperature = (float)data[2];
+
+    return ESP_OK;
+}
+
+static esp_err_t dht11_init(gpio_num_t pin)
+{
+    gpio_reset_pin(pin);
+    gpio_set_direction(pin, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(pin, GPIO_PULLUP_ONLY);
+
+    return ESP_OK;
+}
+
+// ========================================
 // Helper Functions
 // ========================================
 
@@ -271,7 +384,7 @@ static const char* get_light_description(float lux)
 void app_main(void)
 {
     ESP_LOGI("MAIN", "========================================");
-    ESP_LOGI("MAIN", "Multi-Sensor Test: BH1750 + DS18B20");
+    ESP_LOGI("MAIN", "Multi-Sensor Test: BH1750 + DS18B20 + DHT11");
     ESP_LOGI("MAIN", "Waveshare ESP32-C6-Zero");
     ESP_LOGI("MAIN", "========================================");
 
@@ -306,6 +419,18 @@ void app_main(void)
         ESP_LOGE(TAG_DS18B20, "✗ DS18B20 not found");
         ESP_LOGE(TAG_DS18B20, "Check wiring: VCC→3.3V, GND→GND, DATA→GPIO5");
         ESP_LOGE(TAG_DS18B20, "Verify 4.7kΩ pull-up resistor on DATA line");
+    }
+
+    // Initialize DHT11
+    ESP_LOGI(TAG_DHT11, "Initializing DHT11 (GPIO%d)...", DHT11_GPIO);
+    bool dht11_ok = false;
+    ret = dht11_init(DHT11_GPIO);
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG_DHT11, "✓ DHT11 initialized");
+        dht11_ok = true;
+    } else {
+        ESP_LOGE(TAG_DHT11, "✗ DHT11 init failed");
+        ESP_LOGE(TAG_DHT11, "Check wiring: VCC→3.3V, GND→GND, DATA→GPIO4");
     }
 
     ESP_LOGI("MAIN", "========================================");
@@ -344,10 +469,23 @@ void app_main(void)
             float temperature;
             ret = ds18b20_read_temperature(DS18B20_GPIO, &temperature);
             if (ret == ESP_OK) {
-                ESP_LOGI(TAG_DS18B20, "Temp:  %6.2f °C  (%.2f °F)",
+                ESP_LOGI(TAG_DS18B20, "Temp:  %6.2f °C  (%.2f °F)  [Outdoor]",
                          temperature, (temperature * 9.0/5.0) + 32.0);
             } else {
                 ESP_LOGE(TAG_DS18B20, "Failed to read temperature");
+            }
+        }
+
+        // Read DHT11 (requires 1-2 second interval between reads)
+        if (dht11_ok) {
+            float dht_temp, dht_hum;
+            ret = dht11_read_data(DHT11_GPIO, &dht_temp, &dht_hum);
+            if (ret == ESP_OK) {
+                ESP_LOGI(TAG_DHT11, "Temp:  %6.1f °C  (%.1f °F)  [Indoor]",
+                         dht_temp, (dht_temp * 9.0/5.0) + 32.0);
+                ESP_LOGI(TAG_DHT11, "Humid: %6.1f %%", dht_hum);
+            } else {
+                ESP_LOGE(TAG_DHT11, "Failed to read DHT11");
             }
         }
 
