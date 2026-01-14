@@ -269,6 +269,45 @@ Once BH1750 is working:
 
 ---
 
+## Temperature Calibration
+
+**Problem:** Temperature sensors may read higher than actual room temperature due to self-heating from ESP32, voltage regulator, and other components.
+
+**Symptoms:**
+- Both DS18B20 and DHT11 read similar temperatures (e.g., 23°C)
+- But reference thermometer shows lower temperature (e.g., 16.5°C)
+- Offset is consistent over time
+
+**Solutions:**
+
+### Option 1: Physical Separation (Recommended)
+- **DS18B20:** Extend cable to 1-2 meters away from ESP32
+- **DHT11:** Add wire extensions, move 20-30cm from board
+- **Benefit:** More accurate readings, no software changes needed
+
+### Option 2: Software Calibration Offsets
+Edit `src/main.c` and adjust these values:
+
+```c
+// Temperature Calibration Offsets (°C)
+#define DS18B20_OFFSET_C    -6.5    // Adjust based on reference thermometer
+#define DHT11_OFFSET_C      -6.5    // Positive = sensor high, negative = sensor low
+```
+
+**How to calibrate:**
+1. Place reference thermometer near sensors
+2. Wait 30 minutes for thermal equilibrium
+3. Calculate offset: `OFFSET = actual_temp - sensor_reading`
+4. Update defines in `main.c`
+5. Rebuild and upload firmware
+
+**Example:**
+- Sensor reads: 23.0°C
+- Reference thermometer: 16.5°C
+- Offset: 16.5 - 23.0 = **-6.5°C**
+
+---
+
 **Test Status:** ✅ All Sensors Passed
 - BH1750: 91.7 lux ✅
 - DS18B20: 21.38°C (outdoor) ✅

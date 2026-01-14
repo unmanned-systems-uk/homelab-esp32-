@@ -40,6 +40,15 @@
 #define DHT11_GPIO                  4       // GPIO4
 #define DHT11_TIMEOUT_US            1000    // Timeout for bit reads
 
+// ========================================
+// Temperature Calibration Offsets
+// ========================================
+// Adjust these values based on reference thermometer
+// Positive value = sensor reads HIGH, subtract to correct
+// Negative value = sensor reads LOW, add to correct
+#define DS18B20_OFFSET_C            -6.5    // DS18B20 calibration offset
+#define DHT11_OFFSET_C              -6.5    // DHT11 calibration offset
+
 static const char *TAG_BH1750 = "BH1750";
 static const char *TAG_DS18B20 = "DS18B20";
 static const char *TAG_DHT11 = "DHT11";
@@ -470,8 +479,11 @@ void app_main(void)
             float temperature;
             ret = ds18b20_read_temperature(DS18B20_GPIO, &temperature);
             if (ret == ESP_OK) {
+                // Apply calibration offset
+                float calibrated_temp = temperature + DS18B20_OFFSET_C;
+                float temp_f = (calibrated_temp * 9.0/5.0) + 32.0;
                 ESP_LOGI(TAG_DS18B20, "Temp:  %6.2f °C  (%.2f °F)  [Outdoor]",
-                         temperature, (temperature * 9.0/5.0) + 32.0);
+                         calibrated_temp, temp_f);
             } else {
                 ESP_LOGE(TAG_DS18B20, "Failed to read temperature");
             }
@@ -482,8 +494,11 @@ void app_main(void)
             float dht_temp, dht_hum;
             ret = dht11_read_data(DHT11_GPIO, &dht_temp, &dht_hum);
             if (ret == ESP_OK) {
+                // Apply calibration offset
+                float calibrated_temp = dht_temp + DHT11_OFFSET_C;
+                float temp_f = (calibrated_temp * 9.0/5.0) + 32.0;
                 ESP_LOGI(TAG_DHT11, "Temp:  %6.1f °C  (%.1f °F)  [Indoor]",
-                         dht_temp, (dht_temp * 9.0/5.0) + 32.0);
+                         calibrated_temp, temp_f);
                 ESP_LOGI(TAG_DHT11, "Humid: %6.1f %%", dht_hum);
             } else {
                 ESP_LOGE(TAG_DHT11, "Failed to read DHT11");
