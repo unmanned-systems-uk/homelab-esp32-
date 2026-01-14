@@ -73,7 +73,7 @@ BH1750 Module    Waveshare ESP32-C6-Zero    DS18B20 Probe    DHT11 Module
 
 ```bash
 # Navigate to test directory
-cd tests/bh1750-test
+cd tests/multi-sensor-test
 
 # Build firmware
 pio run
@@ -229,46 +229,6 @@ for(address = 1; address < 127; address++ ) {
 
 ---
 
-## Next Steps
-
-Once BH1750 is working:
-
-1. **Take photos/videos** of sensor responding to light changes
-2. **Record lux values** for different locations in your home
-3. **Move to next test:** `ds18b20-test/` (outdoor temperature)
-
----
-
-## Technical Specifications
-
-| Parameter | Value |
-|-----------|-------|
-| Interface | I2C (TWI) |
-| I2C Address | 0x23 (ADDR→GND) or 0x5C (ADDR→Float) |
-| Supply Voltage | 3.0V - 5.0V (use 3.3V for ESP32-C6) |
-| Current Draw | 0.12 mA (active) |
-| Resolution | 1 lux (H-Resolution Mode) |
-| Measurement Range | 0-65535 lux |
-| Accuracy | ±20% typical |
-| Response Time | ~120ms (H-Resolution), ~16ms (L-Resolution) |
-
----
-
-## Library Documentation
-
-**PlatformIO Library:** `claws/BH1750@^1.3.0`
-
-**Modes:**
-- `CONTINUOUS_HIGH_RES_MODE` - Continuous 1 lux resolution (default)
-- `CONTINUOUS_HIGH_RES_MODE_2` - Continuous 0.5 lux resolution
-- `CONTINUOUS_LOW_RES_MODE` - Continuous 4 lux resolution (faster)
-- `ONE_TIME_HIGH_RES_MODE` - One-shot high resolution
-- `ONE_TIME_LOW_RES_MODE` - One-shot low resolution
-
-**GitHub:** https://github.com/claws/BH1750
-
----
-
 ## Temperature Calibration
 
 **Problem:** Temperature sensors may read higher than actual room temperature due to self-heating from ESP32, voltage regulator, and other components.
@@ -290,8 +250,8 @@ Edit `src/main.c` and adjust these values:
 
 ```c
 // Temperature Calibration Offsets (°C)
-#define DS18B20_OFFSET_C    -6.5    // Adjust based on reference thermometer
-#define DHT11_OFFSET_C      -6.5    // Positive = sensor high, negative = sensor low
+#define DS18B20_OFFSET_C    -1    // Adjust based on reference thermometer
+#define DHT11_OFFSET_C      -1    // Positive = sensor high, negative = sensor low
 ```
 
 **How to calibrate:**
@@ -305,6 +265,59 @@ Edit `src/main.c` and adjust these values:
 - Sensor reads: 23.0°C
 - Reference thermometer: 16.5°C
 - Offset: 16.5 - 23.0 = **-6.5°C**
+
+---
+
+## Technical Specifications
+
+### BH1750
+
+| Parameter | Value |
+|-----------|-------|
+| Interface | I2C (TWI) |
+| I2C Address | 0x23 (ADDR→GND) or 0x5C (ADDR→Float) |
+| Supply Voltage | 3.0V - 5.0V (use 3.3V for ESP32-C6) |
+| Current Draw | 0.12 mA (active) |
+| Resolution | 1 lux (H-Resolution Mode) |
+| Measurement Range | 0-65535 lux |
+| Accuracy | ±20% typical |
+| Response Time | ~120ms (H-Resolution), ~16ms (L-Resolution) |
+
+### DS18B20
+
+| Parameter | Value |
+|-----------|-------|
+| Interface | 1-Wire (Dallas) |
+| Supply Voltage | 3.0V - 5.5V |
+| Current Draw | 1.0 mA (active) |
+| Resolution | 9-12 bits (0.0625°C at 12-bit) |
+| Measurement Range | -55°C to +125°C |
+| Accuracy | ±0.5°C (-10°C to +85°C) |
+| Conversion Time | 750ms (12-bit resolution) |
+
+### DHT11
+
+| Parameter | Value |
+|-----------|-------|
+| Interface | 1-Wire (DHT Protocol) |
+| Supply Voltage | 3.0V - 5.5V |
+| Current Draw | 0.5-2.5 mA |
+| Temperature Range | 0°C to 50°C |
+| Temperature Accuracy | ±2°C |
+| Humidity Range | 20% to 90% RH |
+| Humidity Accuracy | ±5% RH |
+| Sampling Period | 1 second minimum |
+
+---
+
+## Next Steps
+
+Once all sensors are working:
+
+1. ✅ **Document calibration offsets** for your specific setup
+2. ✅ **Take baseline readings** in different locations
+3. **Move to Zigbee integration** - create production firmware with native ESP-IDF + Zigbee stack
+4. **Design PCB** for permanent installation
 
 ---
 

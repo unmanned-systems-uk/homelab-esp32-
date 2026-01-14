@@ -61,15 +61,10 @@
 
 ```
 homelab-esp32/
-├── tests/                      # Sensor test projects (Arduino)
-│   ├── bh1750-test/            # BH1750 illuminance
-│   ├── ds18b20-test/           # DS18B20 outdoor temp
-│   ├── dht11-test/             # DHT11 indoor temp/humidity
-│   ├── multi-sensor-test/      # All sensors together
-│   ├── hello-world/            # Basic UART test
-│   └── neopixel-rgb/           # RGB LED test
+├── tests/                      # Sensor test projects (ESP-IDF)
+│   └── multi-sensor-test/      # BH1750 + DS18B20 + DHT11 (all 3 sensors)
 │
-├── zigbee-multi-sensor/        # Production firmware (ESP-IDF)
+├── zigbee-multi-sensor/        # Production firmware (ESP-IDF + Zigbee)
 │   ├── src/                    # Source code
 │   ├── include/                # Headers
 │   └── platformio.ini          # ESP-IDF config
@@ -99,29 +94,35 @@ git clone https://github.com/unmanned-systems-uk/homelab-esp32-.git
 cd homelab-esp32-
 ```
 
-### Test First Sensor: BH1750
+### Test All Sensors: Multi-Sensor Test
 
 ```bash
-cd tests/bh1750-test
+cd tests/multi-sensor-test
 pio run --target upload && pio device monitor
 ```
 
-See test README files for wiring instructions.
+**Tests all 3 sensors simultaneously:**
+- BH1750 (light sensor via I2C)
+- DS18B20 (outdoor temperature via 1-Wire)
+- DHT11 (indoor temperature/humidity via 1-Wire)
+
+See `tests/multi-sensor-test/README.md` for complete wiring instructions and testing procedure.
 
 ---
 
-## 🧪 Sensor Testing Order
+## 🧪 Sensor Testing Status
 
-**Start here:**
-1. **BH1750** (easiest - I2C digital)
-2. **DS18B20** (1-Wire digital)
-3. **DHT11** (1-Wire, timing sensitive)
-4. **Multi-sensor** (all together)
+**All sensors validated and working:**
+- ✅ **BH1750** - I2C digital light sensor
+- ✅ **DS18B20** - 1-Wire outdoor temperature
+- ✅ **DHT11** - 1-Wire indoor temp/humidity
+- ✅ **Multi-sensor integration** - All 3 sensors working simultaneously
 
-Each test directory has:
-- `README.md` - Wiring diagram, setup instructions
-- `platformio.ini` - Build configuration
-- `src/main.cpp` - Test code
+Test directory:
+- `tests/multi-sensor-test/` - Complete integrated test
+  - `README.md` - Wiring diagram, setup, troubleshooting
+  - `platformio.ini` - ESP-IDF build configuration
+  - `src/main.c` - Multi-sensor test code
 
 ---
 

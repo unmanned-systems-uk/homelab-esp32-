@@ -156,21 +156,23 @@ Establish UART connection and receive raw data.
 ## Phase 3: Zigbee Integration (Major Learning Curve)
 
 ### [ESP32-P3] Migrate to ESP-IDF framework for Zigbee support
-**Priority:** CRITICAL | **Status:** TODO
+**Priority:** ~~CRITICAL~~ N/A | **Status:** ✅ SKIPPED
 
-**BIG CHANGE:** Switch from Arduino to ESP-IDF framework.
+**DECISION UPDATE:** Started with ESP-IDF framework from the beginning (no migration needed).
 
-**Why:** ESP-Zigbee-SDK requires ESP-IDF (Arduino doesn't support Zigbee natively).
+**Using ESP-IDF from day one provides:**
+- Native Zigbee support without framework conversion
+- Production-ready patterns from the start
+- Single learning path (no context switching)
+- Direct access to FreeRTOS and ESP-IDF features
 
-**What Changes:**
-- `setup()` → `app_main()`
-- `loop()` → FreeRTOS tasks
-- `Serial.println()` → `ESP_LOGI()` macros
-- Arduino libraries → ESP-IDF drivers
+**ESP-IDF Key Concepts:**
+- `app_main()` - Entry point (replaces Arduino setup/loop)
+- FreeRTOS tasks - Concurrent sensor reading
+- `ESP_LOGI()` - Logging macros
+- ESP-IDF component drivers - Native sensor libraries
 
-**This is the steepest learning curve in the project.** ESP-IDF is more complex but more powerful. Take 1-2 days to learn the basics.
-
-**Success Criteria:** All sensors still work after migration to ESP-IDF
+**Success Criteria:** ✅ ESP-IDF environment configured and operational
 
 ---
 

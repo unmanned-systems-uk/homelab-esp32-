@@ -115,7 +115,14 @@ Build a production-ready ESP32-C6 Zigbee multi-sensor device for 24/7 environmen
 | Libraries | ESP-specific | Massive ecosystem |
 | Recommendation | **Production** | **Prototyping** |
 
-**Decision**: Start with **Arduino framework** for sensor testing, migrate to **ESP-IDF** for Zigbee integration.
+**Decision**: Use **ESP-IDF native framework** from the start for production-grade development.
+
+**Rationale**: Direct ESP-IDF development provides:
+- Native Zigbee support without framework limitations
+- Single learning path (no migration overhead)
+- Production-ready patterns from day one
+- Full control over FreeRTOS tasks and timing
+- Better long-term maintainability
 
 ### Project Structure
 
@@ -244,6 +251,8 @@ esp32-zigbee-sensor/
 
 ### Phase 2: Sensor Integration (Day 2-3)
 
+**Note**: Sensors have been tested using Arduino framework examples (see `tests/` directory). Production implementation will use ESP-IDF native drivers integrated with Zigbee stack. The Arduino examples below are provided as reference for understanding sensor behavior.
+
 **Order of Integration** (simple to complex):
 
 #### 2.1 BH1750 Illuminance Sensor (Easiest)
@@ -359,7 +368,7 @@ void parseLD2450Packet() {
 
 ### Phase 3: Zigbee Integration (Day 4-5)
 
-**Framework Migration**: Switch to ESP-IDF for native Zigbee support
+**Status**: Using ESP-IDF framework from the start for native Zigbee support.
 
 **platformio.ini**:
 ```ini
