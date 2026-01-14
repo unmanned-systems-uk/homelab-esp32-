@@ -1,0 +1,34 @@
+{
+    "folders": [
+        {
+            "name": "homelab-esp32 (Root)",
+            "path": "."
+        },
+        {
+            "name": "BH1750 Test",
+            "path": "tests/bh1750-test"
+        },
+        {
+            "name": "DS18B20 Test",
+            "path": "tests/ds18b20-test"
+        },
+        {
+            "name": "DHT11 Test",
+            "path": "tests/dht11-test"
+        },
+        {
+            "name": "Multi-Sensor Test",
+            "path": "tests/multi-sensor-test"
+        },
+        {
+            "name": "Zigbee Multi-Sensor (Production)",
+            "path": "zigbee-multi-sensor"
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "*.h": "c",
+            "*.c": "c"
+        }
+    }
+}
