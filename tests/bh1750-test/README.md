@@ -2,6 +2,7 @@
 
 **Sensor:** BH1750 Digital Light Sensor
 **Interface:** I2C
+**Framework:** ESP-IDF (native, no Arduino)
 **Purpose:** Test light level measurement (0-65535 lux)
 
 ---
