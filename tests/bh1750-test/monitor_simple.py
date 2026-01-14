@@ -13,7 +13,7 @@ class SensorMonitor:
     def __init__(self, root):
         self.root = root
         self.root.title("ESP32 Multi-Sensor Monitor")
-        self.root.geometry("500x480")
+        self.root.geometry("500x500")
 
         self.serial_port = None
         self.running = False
