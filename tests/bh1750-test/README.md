@@ -1,9 +1,11 @@
-# BH1750 Illuminance Sensor Test
+# Multi-Sensor Test: BH1750 + DS18B20
 
-**Sensor:** BH1750 Digital Light Sensor
-**Interface:** I2C
-**Framework:** ESP-IDF (native, no Arduino)
-**Purpose:** Test light level measurement (0-65535 lux)
+**Sensors:**
+- BH1750 Digital Light Sensor (I2C)
+- DS18B20 Digital Temperature Sensor (1-Wire)
+
+**Framework:** ESP-IDF (native)
+**Purpose:** Test I2C and 1-Wire sensors simultaneously
 
 ---
 
@@ -12,30 +14,44 @@
 ### Wiring Diagram
 
 ```
-BH1750 Module          Waveshare ESP32-C6-Zero
-┌──────────┐
-│  BH1750  │
-│          │           ┌──────────────┐
-│  VCC  ───┼──────────►│ 3.3V         │
-│  GND  ───┼──────────►│ GND          │
-│  SCL  ───┼──────────►│ GPIO2 (SCL)  │
-│  SDA  ───┼──────────►│ GPIO1 (SDA)  │
-│  ADDR ───┼───────────┤ GND or Float │ (Address selection)
-│          │           │              │
-└──────────┘           └──────────────┘
+BH1750 Module          Waveshare ESP32-C6-Zero    DS18B20 Probe
+┌──────────┐                                      ┌──────────┐
+│  BH1750  │           ┌──────────────┐           │ DS18B20  │
+│          │           │              │           │  Probe   │
+│  VCC  ───┼──────────►│ 3.3V ◄───────┼───────────│ RED      │
+│  GND  ───┼──────────►│ GND  ◄───────┼───────────│ BLACK    │
+│  SCL  ───┼──────────►│ GPIO2 (SCL)  │           │          │
+│  SDA  ───┼──────────►│ GPIO1 (SDA)  │           │          │
+│  ADDR ───┼───────────┤ GND or Float │  [4.7kΩ]  │          │
+│          │           │ GPIO5 ◄──────┴───┬───────│ YELLOW   │
+└──────────┘           │              │   │       │          │
+                       │ 3.3V ─────────────┘       │          │
+                       └──────────────┘            └──────────┘
 ```
+
+**Note:** DS18B20 requires 4.7kΩ pull-up resistor between DATA and 3.3V
 
 ### Pin Connections
 
-| BH1750 Pin | ESP32-C6 Pin | Notes |
-|------------|--------------|-------|
+**BH1750 (I2C):**
+
+| Pin | ESP32-C6 Pin | Notes |
+|-----|--------------|-------|
 | VCC | 3.3V | **NOT 5V!** ESP32-C6 is 3.3V only |
 | GND | GND | Ground |
 | SCL | GPIO2 | I2C Clock (4.7kΩ pull-up usually on module) |
 | SDA | GPIO1 | I2C Data (4.7kΩ pull-up usually on module) |
 | ADDR | GND or Float | GND = 0x23, Float = 0x5C (default 0x23) |
 
-**Note:** Most BH1750 modules have built-in 4.7kΩ pull-up resistors. If yours doesn't, add them between SDA→3.3V and SCL→3.3V.
+**DS18B20 (1-Wire):**
+
+| Wire Color | ESP32-C6 Pin | Notes |
+|------------|--------------|-------|
+| RED | 3.3V | Power |
+| BLACK | GND | Ground |
+| YELLOW | GPIO5 | Data (requires 4.7kΩ pull-up to 3.3V) |
+
+**Important:** DS18B20 requires external 4.7kΩ pull-up resistor between DATA and 3.3V!
 
 ---
 
