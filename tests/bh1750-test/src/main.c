@@ -46,8 +46,8 @@
 // Adjust these values based on reference thermometer
 // Positive value = sensor reads HIGH, subtract to correct
 // Negative value = sensor reads LOW, add to correct
-#define DS18B20_OFFSET_C            -6.5    // DS18B20 calibration offset
-#define DHT11_OFFSET_C              -6.5    // DHT11 calibration offset
+#define DS18B20_OFFSET_C            -1    // DS18B20 calibration offset
+#define DHT11_OFFSET_C              -1   // DHT11 calibration offset
 
 static const char *TAG_BH1750 = "BH1750";
 static const char *TAG_DS18B20 = "DS18B20";
