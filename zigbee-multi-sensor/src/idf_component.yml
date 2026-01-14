@@ -1,0 +1,7 @@
+dependencies:
+  espressif/esp-zigbee-lib:
+    version: "~1.0.9"
+  espressif/esp-zboss-lib:
+    version: "~1.0.0"
+  espressif/led_strip:
+    version: "~2.5.0"
