@@ -269,5 +269,9 @@ Once BH1750 is working:
 
 ---
 
-**Test Status:** ⏳ Testing DHT11 (BH1750 ✅, DS18B20 ✅, DHT11 pending)
+**Test Status:** ✅ All Sensors Passed
+- BH1750: 91.7 lux ✅
+- DS18B20: 21.38°C (outdoor) ✅
+- DHT11: 30.0°C + 32% humidity (indoor) ✅
+
 **Last Updated:** 2026-01-14
