@@ -147,10 +147,16 @@ Each test directory has:
 
 ## 📚 Documentation
 
-- **[Development Plan](docs/guides/development-plan.md)** - Full roadmap
-- **[Sensor Testing](docs/guides/sensor-testing.md)** - Test procedures
-- **[Hardware Setup](docs/hardware/waveshare-esp32-c6-zero.md)** - Wiring
-- **[Zigbee Integration](docs/guides/zigbee-integration.md)** - ESP-IDF setup
+### Project Guides
+- **[ESP32 Zigbee Approach Analysis](docs/esp32-zigbee-approach-analysis.md)** - ESPHome vs ESP-IDF decision
+- **[ESP32 Zigbee Development Plan](docs/esp32-zigbee-development-plan.md)** - Full development roadmap
+- **[ESP32 Zigbee Sprint Tasks](docs/esp32-zigbee-sprint-tasks.md)** - Task breakdown
+
+### Hardware Documentation
+- **[Waveshare ESP32-C6-Zero Notes](docs/hardware/waveshare-esp32-c6-zero-notes.md)** - Pinout, wiring, specifications
+
+### Sensor Integration Guides
+- **[DS18B20 Integration Guide](docs/sensors/ds18b20-integration-guide.md)** - 1-Wire temperature sensor setup
 
 ---
 
