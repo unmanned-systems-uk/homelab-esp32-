@@ -9,14 +9,17 @@
 
 ## 📋 Project Status
 
-**Current Phase:** Sensor Testing & Integration
+**Current Phase:** Zigbee Integration (Phase 3)
 **Sprint:** HA-S1 Foundation Setup
+**Decision:** Native ESP-IDF approach confirmed (ESPHome lacks Zigbee support)
 
 | Phase | Status | Notes |
 |-------|--------|-------|
 | Environment Setup | ✅ Complete | VS Code + PlatformIO working |
-| Sensor Testing | 🔄 In Progress | BH1750, DS18B20, DHT11 arrived |
-| Zigbee Integration | ⏳ Pending | ESP-IDF migration planned |
+| Sensor Testing | ✅ Complete | BH1750, DS18B20, DHT11 all operational |
+| Multi-Sensor Integration | ✅ Complete | All 3 sensors working simultaneously |
+| Zigbee Integration | 🔄 In Progress | ESP-IDF Zigbee stack integration |
+| HLK-LD2450 Integration | ⏳ Pending | 3 units in stock, awaiting integration |
 | Production Deployment | ⏳ Pending | PCB design + enclosure |
 
 ---
@@ -31,14 +34,14 @@
 - **Form Factor:** Compact module (25.4mm × 20.8mm)
 - **USB:** USB-C (programming + power)
 
-### Sensors (All Arrived ✅)
+### Sensors
 
-| Sensor | Type | Interface | Purpose |
-|--------|------|-----------|---------|
-| **BH1750** | Illuminance | I2C | Light level (0-65535 lux) |
-| **DS18B20** | Temperature | 1-Wire | Outdoor temp (-55°C to +125°C) |
-| **DHT11** | Temp/Humidity | 1-Wire | Indoor climate (±2°C, ±5% RH) |
-| **HLK-LD2450** | mmWave Radar | UART | Presence + trajectory (TBD) |
+| Sensor | Type | Interface | Purpose | Status |
+|--------|------|-----------|---------|--------|
+| **BH1750** | Illuminance | I2C | Light level (0-65535 lux) | ✅ Tested |
+| **DS18B20** | Temperature | 1-Wire | Outdoor temp (-55°C to +125°C) | ✅ Tested |
+| **DHT11** | Temp/Humidity | 1-Wire | Indoor climate (±2°C, ±5% RH) | ✅ Tested |
+| **HLK-LD2450** | mmWave Radar | UART | Presence + trajectory (3 units) | 📦 In Stock |
 
 ### Pin Assignments
 
