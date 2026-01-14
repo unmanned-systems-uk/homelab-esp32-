@@ -245,5 +245,5 @@ Once BH1750 is working:
 
 ---
 
-**Test Status:** ⏳ Pending
+**Test Status:** ✅ Passed (BH1750: 53.3 lux, DS18B20: 16-17°C)
 **Last Updated:** 2026-01-14
